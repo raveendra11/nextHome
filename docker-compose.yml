@@ -16,7 +16,7 @@ services:
       retries: 10
 
   vacancy-service:
-    build: /home/runner/work/nextHome/nextHome/backend/vacancy-service
+    build: ./backend/vacancy-service
     environment:
       DB_URL: jdbc:mysql://mysql:3306/vacancy_db
       DB_USERNAME: root
@@ -28,7 +28,7 @@ services:
       - "8081:8081"
 
   search-service:
-    build: /home/runner/work/nextHome/nextHome/backend/search-service
+    build: ./backend/search-service
     environment:
       VACANCY_SERVICE_URL: http://vacancy-service:8081
     depends_on:
@@ -37,7 +37,7 @@ services:
       - "8082:8082"
 
   gateway-service:
-    build: /home/runner/work/nextHome/nextHome/backend/gateway-service
+    build: ./backend/gateway-service
     environment:
       VACANCY_SERVICE_URL: http://vacancy-service:8081
       SEARCH_SERVICE_URL: http://search-service:8082
