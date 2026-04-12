@@ -1,0 +1,10 @@
+com/nexthome/vacancy/exception/GlobalExceptionHandler.class
+com/nexthome/vacancy/controller/VacancyController.class
+com/nexthome/vacancy/VacancyServiceApplication.class
+com/nexthome/vacancy/repository/VacancyRepository.class
+com/nexthome/vacancy/service/VacancyService.class
+com/nexthome/vacancy/entity/Vacancy.class
+com/nexthome/vacancy/service/DistanceCalculator.class
+com/nexthome/vacancy/config/CorsConfig.class
+com/nexthome/vacancy/dto/VacancyRequest.class
+com/nexthome/vacancy/dto/VacancyResponse.class

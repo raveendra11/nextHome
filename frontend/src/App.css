@@ -1,0 +1,125 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  background: #f5f7fb;
+  color: #1b2a41;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.home-screen {
+  width: min(900px, 100%);
+  text-align: center;
+}
+
+.home-screen h1 {
+  margin-bottom: 32px;
+}
+
+.home-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.home-action {
+  min-height: 220px;
+  font-size: 2rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #2b6cb0, #1a202c);
+  color: #fff;
+  cursor: pointer;
+}
+
+.screen {
+  width: min(900px, 100%);
+}
+
+.back-button {
+  margin-bottom: 12px;
+  border: none;
+  background: #1a202c;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.form-grid,
+.filters {
+  display: grid;
+  gap: 10px;
+}
+
+input,
+textarea,
+button {
+  font: inherit;
+}
+
+input,
+textarea {
+  border: 1px solid #d2d7e1;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+textarea {
+  min-height: 100px;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  background: #2b6cb0;
+  color: #fff;
+  padding: 10px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.row-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.vacancy-list {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.vacancy-card h3 {
+  margin-top: 0;
+}
+
+.ok-message {
+  color: #0b8c53;
+}
+
+.error-message {
+  color: #bf1f2f;
+}
