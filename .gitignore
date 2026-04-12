@@ -1,0 +1,11 @@
+# Java
+**/target/
+
+# Node
+**/node_modules/
+frontend/dist/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
