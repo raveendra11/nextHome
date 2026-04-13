@@ -70,6 +70,17 @@ class VacancyControllerTest {
     }
 
     @Test
+    void getsVacancyById() throws Exception {
+        setupVacancy();
+        Vacancy vacancy = vacancyRepository.findAll().get(0);
+
+        mockMvc.perform(get("/api/vacancies/{id}", vacancy.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(vacancy.getId()))
+                .andExpect(jsonPath("$.title").value("Shared room near metro"));
+    }
+
+    @Test
     void listsVacanciesByCity() throws Exception {
         setupVacancy();
         VacancyRequest hyderabadRequest = new VacancyRequest(
@@ -120,6 +131,31 @@ class VacancyControllerTest {
     }
 
     @Test
+    void updatesVacancyWithValidTokenHeader() throws Exception {
+        setupVacancy();
+        Vacancy vacancy = vacancyRepository.findAll().get(0);
+
+        VacancyRequest updated = new VacancyRequest(
+                "Updated from header",
+                "Updated description",
+                "PRIVATE",
+                new BigDecimal("9000"),
+                "Bengaluru",
+                "Indiranagar",
+                null,
+                null,
+                "ravi"
+        );
+
+        mockMvc.perform(put("/api/vacancies/{id}", vacancy.getId())
+                        .header("X-Management-Token", vacancy.getManagementToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updated)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Updated from header"));
+    }
+
+    @Test
     void rejectsUpdateWithInvalidToken() throws Exception {
         setupVacancy();
         Vacancy vacancy = vacancyRepository.findAll().get(0);
@@ -138,6 +174,18 @@ class VacancyControllerTest {
 
         mockMvc.perform(delete("/api/vacancies/{id}", vacancy.getId())
                         .param("token", vacancy.getManagementToken()))
+                .andExpect(status().isNoContent());
+
+        assertFalse(vacancyRepository.findById(vacancy.getId()).isPresent());
+    }
+
+    @Test
+    void deletesVacancyWithValidTokenHeader() throws Exception {
+        setupVacancy();
+        Vacancy vacancy = vacancyRepository.findAll().get(0);
+
+        mockMvc.perform(delete("/api/vacancies/{id}", vacancy.getId())
+                        .header("X-Management-Token", vacancy.getManagementToken()))
                 .andExpect(status().isNoContent());
 
         assertFalse(vacancyRepository.findById(vacancy.getId()).isPresent());

@@ -7,12 +7,13 @@ import com.nexthome.vacancy.service.VacancyService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -53,21 +54,36 @@ public class VacancyController {
         return vacancyService.list(city, latitude, longitude, radiusKm);
     }
 
+    @GetMapping("/{id}")
+    public VacancyResponse getById(@PathVariable("id") Long id) {
+        return vacancyService.getById(id);
+    }
+
     @PutMapping("/{id}")
     public VacancyResponse update(
             @PathVariable("id") Long id,
-            @RequestParam("token") @NotBlank(message = "token is required") String token,
+            @RequestParam(name = "token", required = false) String token,
+            @RequestHeader(name = "X-Management-Token", required = false) String tokenHeader,
             @Valid @RequestBody VacancyRequest request
     ) {
-        return vacancyService.update(id, token, request);
+        return vacancyService.update(id, resolveToken(token, tokenHeader), request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(
             @PathVariable("id") Long id,
-            @RequestParam("token") @NotBlank(message = "token is required") String token
+            @RequestParam(name = "token", required = false) String token,
+            @RequestHeader(name = "X-Management-Token", required = false) String tokenHeader
     ) {
-        vacancyService.delete(id, token);
+        vacancyService.delete(id, resolveToken(token, tokenHeader));
+    }
+
+    private String resolveToken(String tokenParam, String tokenHeader) {
+        String token = StringUtils.hasText(tokenHeader) ? tokenHeader : tokenParam;
+        if (!StringUtils.hasText(token)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "token is required");
+        }
+        return token.trim();
     }
 }

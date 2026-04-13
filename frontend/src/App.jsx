@@ -155,7 +155,7 @@ function PostVacancy({ onBack }) {
       {message && <p className="ok-message">{message}</p>}
       {managementToken && (
         <>
-          <p className="ok-message">Vacancy ID: <strong>{vacancyId}</strong></p>
+          {vacancyId && <p className="ok-message">Vacancy ID: <strong>{vacancyId}</strong></p>}
           <p className="ok-message">Management Token: <strong>{managementToken}</strong></p>
           <p className="ok-message">Save this token safely. It is required to update or delete this vacancy later.</p>
           <button type="button" onClick={copyManagementToken}>Copy Token</button>
@@ -220,15 +220,11 @@ function ManageVacancy({ onBack }) {
     setError('')
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/vacancies`)
+      const response = await fetch(`${API_BASE_URL}/api/vacancies/${parsedId}`)
       if (!response.ok) {
-        throw new Error('Unable to load vacancies.')
+        throw new Error('Unable to load vacancy.')
       }
-      const data = await response.json()
-      const vacancy = Array.isArray(data) ? data.find((item) => Number(item.id) === parsedId) : null
-      if (!vacancy) {
-        throw new Error('Vacancy not found for the provided ID.')
-      }
+      const vacancy = await response.json()
       setForm({
         title: vacancy.title || '',
         description: vacancy.description || '',
@@ -258,9 +254,12 @@ function ManageVacancy({ onBack }) {
     setError('')
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/vacancies/${parsedId}?token=${encodeURIComponent(token.trim())}`, {
+      const response = await fetch(`${API_BASE_URL}/api/vacancies/${parsedId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Management-Token': token.trim(),
+        },
         body: JSON.stringify({
           ...form,
           rent: numericValues.rent,
@@ -290,8 +289,11 @@ function ManageVacancy({ onBack }) {
     setError('')
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/vacancies/${parsedId}?token=${encodeURIComponent(token.trim())}`, {
+      const response = await fetch(`${API_BASE_URL}/api/vacancies/${parsedId}`, {
         method: 'DELETE',
+        headers: {
+          'X-Management-Token': token.trim(),
+        },
       })
       if (!response.ok) {
         throw new Error('Unable to delete vacancy. Check ID and management token.')

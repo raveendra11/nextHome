@@ -78,6 +78,12 @@ public class VacancyService {
                 .toList();
     }
 
+    public VacancyResponse getById(Long id) {
+        Vacancy vacancy = vacancyRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Vacancy not found"));
+        return toResponse(vacancy, null);
+    }
+
     public VacancyResponse update(Long id, String token, VacancyRequest request) {
         Vacancy vacancy = getManagedVacancy(id, token);
         vacancy.setTitle(request.title());
