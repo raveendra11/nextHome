@@ -13,6 +13,8 @@ const initialForm = {
   createdBy: '',
 }
 
+const normalizeCity = (city) => (typeof city === 'string' ? city.trim() : '')
+
 function App() {
   const [activeView, setActiveView] = useState('home')
 
@@ -188,25 +190,21 @@ function ViewVacancies({ onBack }) {
   }, [])
 
   const cityOptions = useMemo(() => {
+    const normalizedCities = vacancies.map((vacancy) => normalizeCity(vacancy.city))
     const uniqueCities = new Set()
-    vacancies.forEach((vacancy) => {
-      if (typeof vacancy.city !== 'string') {
-        return
+    normalizedCities.forEach((trimmedCity) => {
+      if (trimmedCity) {
+        uniqueCities.add(trimmedCity)
       }
-      const trimmedCity = vacancy.city.trim()
-      if (!trimmedCity) {
-        return
-      }
-      uniqueCities.add(trimmedCity)
     })
-    return Array.from(uniqueCities)
+    return Array.from(uniqueCities).sort()
   }, [vacancies])
 
   const visibleVacancies = useMemo(() => {
     if (!selectedCity) {
       return vacancies
     }
-    return vacancies.filter((vacancy) => vacancy.city?.trim() === selectedCity)
+    return vacancies.filter((vacancy) => normalizeCity(vacancy.city) === selectedCity)
   }, [vacancies, selectedCity])
 
   return (
