@@ -12,4 +12,6 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
             Double minLongitude,
             Double maxLongitude
     );
+
+    List<Vacancy> findByCityIgnoreCaseOrderByCreatedAtDesc(String city);
 }

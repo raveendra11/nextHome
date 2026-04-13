@@ -9,6 +9,7 @@ public record VacancyResponse(
         String description,
         String roomType,
         BigDecimal rent,
+        String city,
         String address,
         Double latitude,
         Double longitude,

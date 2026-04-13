@@ -8,7 +8,9 @@ import java.time.Instant;
 @Entity
 @Table(name = "vacancies", indexes = {
         @Index(name = "idx_vacancy_lat_lng", columnList = "latitude,longitude"),
-        @Index(name = "idx_vacancy_created_at", columnList = "createdAt")
+        @Index(name = "idx_vacancy_created_at", columnList = "createdAt"),
+        @Index(name = "idx_vacancy_city", columnList = "city"),
+        @Index(name = "idx_vacancy_management_token", columnList = "managementToken", unique = true)
 })
 public class Vacancy {
 
@@ -28,7 +30,10 @@ public class Vacancy {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal rent;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 100)
+    private String city;
+
+    @Column(length = 255)
     private String address;
 
     @Column
@@ -39,6 +44,9 @@ public class Vacancy {
 
     @Column(nullable = false, length = 100)
     private String createdBy;
+
+    @Column(nullable = false, length = 32, unique = true)
+    private String managementToken;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
@@ -96,6 +104,14 @@ public class Vacancy {
         this.address = address;
     }
 
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
     public Double getLatitude() {
         return latitude;
     }
@@ -118,6 +134,14 @@ public class Vacancy {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getManagementToken() {
+        return managementToken;
+    }
+
+    public void setManagementToken(String managementToken) {
+        this.managementToken = managementToken;
     }
 
     public Instant getCreatedAt() {
