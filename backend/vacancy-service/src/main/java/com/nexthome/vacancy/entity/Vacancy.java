@@ -31,10 +31,10 @@ public class Vacancy {
     @Column(nullable = false, length = 255)
     private String address;
 
-    @Column(nullable = false)
+    @Column
     private Double latitude;
 
-    @Column(nullable = false)
+    @Column
     private Double longitude;
 
     @Column(nullable = false, length = 100)

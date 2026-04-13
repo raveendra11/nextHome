@@ -9,8 +9,6 @@ const initialForm = {
   roomType: '',
   rent: '',
   address: '',
-  latitude: '',
-  longitude: '',
   createdBy: '',
 }
 
@@ -51,23 +49,13 @@ function PostVacancy({ onBack }) {
   const numericValues = useMemo(
     () => ({
       rent: Number(form.rent),
-      latitude: Number(form.latitude),
-      longitude: Number(form.longitude),
     }),
-    [form.rent, form.latitude, form.longitude],
+    [form.rent],
   )
 
   const numericValidationError = useMemo(() => {
     if (!Number.isFinite(numericValues.rent) || numericValues.rent <= 0) {
       return 'Rent must be a valid positive number.'
-    }
-
-    if (!Number.isFinite(numericValues.latitude) || numericValues.latitude < -90 || numericValues.latitude > 90) {
-      return 'Latitude must be a valid number between -90 and 90.'
-    }
-
-    if (!Number.isFinite(numericValues.longitude) || numericValues.longitude < -180 || numericValues.longitude > 180) {
-      return 'Longitude must be a valid number between -180 and 180.'
     }
 
     return ''
@@ -102,8 +90,6 @@ function PostVacancy({ onBack }) {
         body: JSON.stringify({
           ...form,
           rent: numericValues.rent,
-          latitude: numericValues.latitude,
-          longitude: numericValues.longitude,
         }),
       })
 
@@ -130,8 +116,6 @@ function PostVacancy({ onBack }) {
         <input placeholder="Room Type (e.g. PRIVATE)" value={form.roomType} onChange={(e) => updateField('roomType', e.target.value)} />
         <input placeholder="Rent" type="number" min="1" value={form.rent} onChange={(e) => updateField('rent', e.target.value)} />
         <input placeholder="Address" value={form.address} onChange={(e) => updateField('address', e.target.value)} />
-        <input placeholder="Latitude" type="number" step="0.000001" value={form.latitude} onChange={(e) => updateField('latitude', e.target.value)} />
-        <input placeholder="Longitude" type="number" step="0.000001" value={form.longitude} onChange={(e) => updateField('longitude', e.target.value)} />
         <input placeholder="Your Name" value={form.createdBy} onChange={(e) => updateField('createdBy', e.target.value)} />
         <button type="submit" disabled={!canSubmit || isLoading}>{isLoading ? 'Posting...' : 'Submit Vacancy'}</button>
       </form>
@@ -146,22 +130,12 @@ function ViewVacancies({ onBack }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const [latitude, setLatitude] = useState('')
-  const [longitude, setLongitude] = useState('')
-  const [radiusKm, setRadiusKm] = useState('5')
-
-  const loadVacancies = async (nearby = false) => {
+  const loadVacancies = async () => {
     setLoading(true)
     setError('')
 
     try {
-      let url = `${API_BASE_URL}/api/vacancies`
-      if (nearby && latitude && longitude && radiusKm) {
-        const query = new URLSearchParams({ latitude, longitude, radiusKm }).toString()
-        url = `${url}?${query}`
-      }
-
-      const response = await fetch(url)
+      const response = await fetch(`${API_BASE_URL}/api/vacancies`)
       if (!response.ok) {
         throw new Error('Unable to fetch vacancies.')
       }
@@ -180,12 +154,8 @@ function ViewVacancies({ onBack }) {
       <button className="back-button" onClick={onBack} type="button">Back</button>
       <h2>View Vacancy</h2>
       <div className="card filters">
-        <input placeholder="Latitude" type="number" value={latitude} onChange={(e) => setLatitude(e.target.value)} />
-        <input placeholder="Longitude" type="number" value={longitude} onChange={(e) => setLongitude(e.target.value)} />
-        <input placeholder="Radius (km)" type="number" min="1" value={radiusKm} onChange={(e) => setRadiusKm(e.target.value)} />
         <div className="row-actions">
-          <button type="button" onClick={() => loadVacancies(false)}>Load All</button>
-          <button type="button" onClick={() => loadVacancies(true)} disabled={!latitude || !longitude || !radiusKm}>Search Nearby</button>
+          <button type="button" onClick={loadVacancies}>Load Vacancies</button>
         </div>
       </div>
 
@@ -201,7 +171,6 @@ function ViewVacancies({ onBack }) {
             <p><strong>Rent:</strong> ₹{vacancy.rent}</p>
             <p><strong>Address:</strong> {vacancy.address}</p>
             <p><strong>Posted By:</strong> {vacancy.createdBy}</p>
-            <p><strong>Location:</strong> {vacancy.latitude}, {vacancy.longitude}</p>
             {typeof vacancy.distanceKm === 'number' && <p><strong>Distance:</strong> {vacancy.distanceKm.toFixed(2)} km</p>}
           </article>
         ))}

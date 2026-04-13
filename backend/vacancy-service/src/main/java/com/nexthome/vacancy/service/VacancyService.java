@@ -59,7 +59,7 @@ public class VacancyService {
         return all.stream()
                 .map(v -> {
                     Double distance = null;
-                    if (latitude != null && longitude != null) {
+                    if (latitude != null && longitude != null && v.getLatitude() != null && v.getLongitude() != null) {
                         distance = DistanceCalculator.distanceInKm(latitude, longitude, v.getLatitude(), v.getLongitude());
                     }
                     return toResponse(v, distance);
