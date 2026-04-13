@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
@@ -160,52 +160,75 @@ function PostVacancy({ onBack }) {
 
 function ViewVacancies({ onBack }) {
   const [vacancies, setVacancies] = useState([])
-  const [cityFilter, setCityFilter] = useState('')
+  const [selectedCity, setSelectedCity] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const loadVacancies = async () => {
-    setLoading(true)
-    setError('')
+  useEffect(() => {
+    const loadVacancies = async () => {
+      setLoading(true)
+      setError('')
 
-    try {
-      const query = cityFilter.trim()
-        ? `?city=${encodeURIComponent(cityFilter.trim())}`
-        : ''
-      const response = await fetch(`${API_BASE_URL}/api/vacancies${query}`)
-      if (!response.ok) {
-        throw new Error('Unable to fetch vacancies.')
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/vacancies`)
+        if (!response.ok) {
+          throw new Error('Unable to fetch vacancies.')
+        }
+
+        const data = await response.json()
+        setVacancies(Array.isArray(data) ? data : [])
+      } catch (loadError) {
+        setError(loadError.message)
+      } finally {
+        setLoading(false)
       }
-
-      const data = await response.json()
-      setVacancies(Array.isArray(data) ? data : [])
-    } catch (loadError) {
-      setError(loadError.message)
-    } finally {
-      setLoading(false)
     }
-  }
+
+    loadVacancies()
+  }, [])
+
+  const cityOptions = useMemo(() => {
+    const uniqueCities = new Set()
+    vacancies.forEach((vacancy) => {
+      if (typeof vacancy.city !== 'string') {
+        return
+      }
+      const trimmedCity = vacancy.city.trim()
+      if (!trimmedCity) {
+        return
+      }
+      uniqueCities.add(trimmedCity)
+    })
+    return Array.from(uniqueCities)
+  }, [vacancies])
+
+  const visibleVacancies = useMemo(() => {
+    if (!selectedCity) {
+      return vacancies
+    }
+    return vacancies.filter((vacancy) => vacancy.city?.trim() === selectedCity)
+  }, [vacancies, selectedCity])
 
   return (
     <section className="screen">
       <button className="back-button" onClick={onBack} type="button">Back</button>
       <h2>View Vacancy</h2>
       <div className="card filters">
-        <input
-          placeholder="Filter by city"
-          value={cityFilter}
-          onChange={(event) => setCityFilter(event.target.value)}
-        />
-        <div className="row-actions">
-          <button type="button" onClick={loadVacancies}>Load Vacancies</button>
-        </div>
+        <select value={selectedCity} onChange={(event) => setSelectedCity(event.target.value)}>
+          <option value="">All cities</option>
+          {cityOptions.map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
+        </select>
       </div>
 
       {loading && <p>Loading...</p>}
       {error && <p className="error-message">{error}</p>}
 
       <div className="vacancy-list">
-        {vacancies.map((vacancy) => (
+        {visibleVacancies.map((vacancy) => (
           <article className="card vacancy-card" key={vacancy.id}>
             <h3>{vacancy.title}</h3>
             <p>{vacancy.description}</p>
