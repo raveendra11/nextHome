@@ -55,7 +55,7 @@ public class VacancyController {
 
     @PutMapping("/{id}")
     public VacancyResponse update(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestParam("token") @NotBlank(message = "token is required") String token,
             @Valid @RequestBody VacancyRequest request
     ) {
@@ -65,7 +65,7 @@ public class VacancyController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestParam("token") @NotBlank(message = "token is required") String token
     ) {
         vacancyService.delete(id, token);
