@@ -40,7 +40,7 @@ function Home({ onSelect }) {
           View Vacancy
         </button>
         <button type="button" className="home-action" onClick={() => onSelect('manage')}>
-          Modify / Delete Post
+          Modify / Delete Vacancy
         </button>
       </div>
     </section>
