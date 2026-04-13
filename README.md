@@ -61,10 +61,35 @@ mvn -pl search-service spring-boot:run
 mvn -pl gateway-service spring-boot:run
 ```
 
-Configure MySQL env vars for vacancy-service:
+### Database setup (required for vacancy-service)
+
+Option 1: Start MySQL with Docker:
+
+```bash
+docker run --name nexthome-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=vacancy_db -p 3306:3306 -d mysql:8.4
+```
+
+Option 2: Use an existing MySQL server and create DB/user:
+
+```sql
+CREATE DATABASE IF NOT EXISTS vacancy_db;
+CREATE USER IF NOT EXISTS 'nexthome'@'%' IDENTIFIED BY 'nexthome';
+GRANT ALL PRIVILEGES ON vacancy_db.* TO 'nexthome'@'%';
+FLUSH PRIVILEGES;
+```
+
+Set DB env vars for vacancy-service:
 - `DB_URL`
 - `DB_USERNAME`
 - `DB_PASSWORD`
+
+Example:
+
+```bash
+export DB_URL=jdbc:mysql://localhost:3306/vacancy_db
+export DB_USERNAME=root
+export DB_PASSWORD=root
+```
 
 ### Frontend
 
