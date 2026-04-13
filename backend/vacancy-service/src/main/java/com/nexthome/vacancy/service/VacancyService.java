@@ -14,6 +14,7 @@ public class VacancyService {
 
     private static final double KM_PER_DEGREE = 111.0;
     private static final double MIN_SAFE_COSINE = 1e-6;
+    private static final double MAX_LONGITUDE_RANGE = 180.0;
 
     private final VacancyRepository vacancyRepository;
 
@@ -43,7 +44,7 @@ public class VacancyService {
             double latitudeDelta = radiusKm / KM_PER_DEGREE;
             double cosine = Math.cos(Math.toRadians(latitude));
             double longitudeDelta = Math.abs(cosine) < MIN_SAFE_COSINE
-                    ? 180.0
+                    ? MAX_LONGITUDE_RANGE
                     : radiusKm / (KM_PER_DEGREE * Math.abs(cosine));
             all = vacancyRepository.findByLatitudeBetweenAndLongitudeBetweenOrderByCreatedAtDesc(
                     latitude - latitudeDelta,

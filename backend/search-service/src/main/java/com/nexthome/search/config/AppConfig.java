@@ -11,10 +11,10 @@ import java.time.Duration;
 @Configuration
 public class AppConfig {
 
-    @Value("${services.vacancy.connect-timeout-ms:2000}")
+    @Value("${services.vacancy.connect-timeout-ms}")
     private long connectTimeoutMs;
 
-    @Value("${services.vacancy.read-timeout-ms:5000}")
+    @Value("${services.vacancy.read-timeout-ms}")
     private long readTimeoutMs;
 
     @Bean
