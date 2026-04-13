@@ -116,8 +116,9 @@ function PostVacancy({ onBack }) {
         throw new Error('Unable to post vacancy. Please verify the details and try again.')
       }
 
+      const createdId = payload && payload.vacancy ? Number(payload.vacancy.id) : NaN
       setMessage('Vacancy posted successfully.')
-      setVacancyId(payload?.vacancy?.id ? String(payload.vacancy.id) : '')
+      setVacancyId(Number.isInteger(createdId) && createdId > 0 ? String(createdId) : '')
       setManagementToken(payload.managementToken || '')
       setTokenCopied(false)
       setForm(initialForm)
