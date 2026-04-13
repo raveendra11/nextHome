@@ -144,3 +144,43 @@ button:disabled {
 .error-message {
   color: #bf1f2f;
 }
+
+@media (max-width: 640px) {
+  .app-shell {
+    place-items: start stretch;
+    padding: 16px;
+  }
+
+  .home-screen h1 {
+    margin-bottom: 20px;
+    font-size: 1.75rem;
+  }
+
+  .home-actions {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .home-action {
+    min-height: 140px;
+    font-size: 1.4rem;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .vacancy-card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .manage-card-button {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .row-actions {
+    grid-template-columns: 1fr;
+  }
+}
