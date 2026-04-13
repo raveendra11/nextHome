@@ -100,6 +100,10 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.danger-button {
+  background: #bf1f2f;
+}
+
 .row-actions {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

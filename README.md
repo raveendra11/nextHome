@@ -7,8 +7,9 @@ Microserviced web application for posting and finding nearby room/home vacancies
 - **vacancy-service (Spring Boot, port 8081)**
   - `POST /api/vacancies` to post vacancy and receive a management token
   - `GET /api/vacancies` to view vacancies (supports optional `city` filter)
-  - `PUT /api/vacancies/{id}?token=...` to modify a vacancy with its management token
-  - `DELETE /api/vacancies/{id}?token=...` to delete a vacancy with its management token
+  - `GET /api/vacancies/{id}` to view a specific vacancy by id
+  - `PUT /api/vacancies/{id}` to modify a vacancy with its management token (`X-Management-Token` header or `token` query param)
+  - `DELETE /api/vacancies/{id}` to delete a vacancy with its management token (`X-Management-Token` header or `token` query param)
   - optional nearby filtering via query params: `latitude`, `longitude`, `radiusKm` (only for location-aware search)
 - **search-service (Spring Boot, port 8082)**
   - `GET /api/search/nearby` (delegates to vacancy-service nearby search)
@@ -105,10 +106,10 @@ Optional API base URL:
 ## Phase coverage
 
 Implemented now:
-- Vacancy service CRUD subset (post + list)
+- Vacancy service token-based post/list/update/delete
 - Nearby filtering support
 - Search microservice and gateway
-- React UI for post/view flows
+- React UI for post/view/modify/delete flows
 - Basic validation, CORS, health endpoints
 - Backend tests for vacancy API
 
