@@ -8,6 +8,7 @@ const initialForm = {
   description: '',
   roomType: '',
   rent: '',
+  city: '',
   address: '',
   createdBy: '',
 }
@@ -44,6 +45,7 @@ function PostVacancy({ onBack }) {
   const [form, setForm] = useState(initialForm)
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [managementToken, setManagementToken] = useState('')
   const [error, setError] = useState('')
 
   const numericValues = useMemo(
@@ -61,10 +63,15 @@ function PostVacancy({ onBack }) {
     return ''
   }, [numericValues])
 
-  const canSubmit = useMemo(
-    () => Object.values(form).every((value) => String(value).trim().length > 0) && !numericValidationError,
-    [form, numericValidationError],
-  )
+  const canSubmit = useMemo(() => {
+    const requiredFieldsFilled =
+      form.title.trim().length > 0 &&
+      form.description.trim().length > 0 &&
+      form.roomType.trim().length > 0 &&
+      form.city.trim().length > 0 &&
+      form.createdBy.trim().length > 0
+    return requiredFieldsFilled && !numericValidationError
+  }, [form, numericValidationError])
 
   const updateField = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -81,6 +88,7 @@ function PostVacancy({ onBack }) {
 
     setIsLoading(true)
     setMessage('')
+    setManagementToken('')
     setError('')
 
     try {
@@ -93,11 +101,14 @@ function PostVacancy({ onBack }) {
         }),
       })
 
+      const payload = await response.json()
+
       if (!response.ok) {
         throw new Error('Unable to post vacancy. Please verify the details and try again.')
       }
 
       setMessage('Vacancy posted successfully.')
+      setManagementToken(payload.managementToken || '')
       setForm(initialForm)
     } catch (submitError) {
       setError(submitError.message)
@@ -115,11 +126,13 @@ function PostVacancy({ onBack }) {
         <textarea placeholder="Description" value={form.description} onChange={(e) => updateField('description', e.target.value)} />
         <input placeholder="Room Type (e.g. PRIVATE)" value={form.roomType} onChange={(e) => updateField('roomType', e.target.value)} />
         <input placeholder="Rent" type="number" min="1" value={form.rent} onChange={(e) => updateField('rent', e.target.value)} />
-        <input placeholder="Address" value={form.address} onChange={(e) => updateField('address', e.target.value)} />
+        <input placeholder="City" value={form.city} onChange={(e) => updateField('city', e.target.value)} />
+        <input placeholder="Address (optional)" value={form.address} onChange={(e) => updateField('address', e.target.value)} />
         <input placeholder="Your Name" value={form.createdBy} onChange={(e) => updateField('createdBy', e.target.value)} />
         <button type="submit" disabled={!canSubmit || isLoading}>{isLoading ? 'Posting...' : 'Submit Vacancy'}</button>
       </form>
       {message && <p className="ok-message">{message}</p>}
+      {managementToken && <p className="ok-message">Management Token: <strong>{managementToken}</strong></p>}
       {error && <p className="error-message">{error}</p>}
     </section>
   )
@@ -127,6 +140,7 @@ function PostVacancy({ onBack }) {
 
 function ViewVacancies({ onBack }) {
   const [vacancies, setVacancies] = useState([])
+  const [cityFilter, setCityFilter] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -135,7 +149,10 @@ function ViewVacancies({ onBack }) {
     setError('')
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/vacancies`)
+      const query = cityFilter.trim()
+        ? `?city=${encodeURIComponent(cityFilter.trim())}`
+        : ''
+      const response = await fetch(`${API_BASE_URL}/api/vacancies${query}`)
       if (!response.ok) {
         throw new Error('Unable to fetch vacancies.')
       }
@@ -154,6 +171,11 @@ function ViewVacancies({ onBack }) {
       <button className="back-button" onClick={onBack} type="button">Back</button>
       <h2>View Vacancy</h2>
       <div className="card filters">
+        <input
+          placeholder="Filter by city"
+          value={cityFilter}
+          onChange={(event) => setCityFilter(event.target.value)}
+        />
         <div className="row-actions">
           <button type="button" onClick={loadVacancies}>Load Vacancies</button>
         </div>
@@ -169,7 +191,8 @@ function ViewVacancies({ onBack }) {
             <p>{vacancy.description}</p>
             <p><strong>Room Type:</strong> {vacancy.roomType}</p>
             <p><strong>Rent:</strong> ₹{vacancy.rent}</p>
-            <p><strong>Address:</strong> {vacancy.address}</p>
+            <p><strong>City:</strong> {vacancy.city}</p>
+            {vacancy.address && <p><strong>Address:</strong> {vacancy.address}</p>}
             <p><strong>Posted By:</strong> {vacancy.createdBy}</p>
           </article>
         ))}

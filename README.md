@@ -5,8 +5,10 @@ Microserviced web application for posting and finding nearby room/home vacancies
 ## Architecture
 
 - **vacancy-service (Spring Boot, port 8081)**
-  - `POST /api/vacancies` to post vacancy
-  - `GET /api/vacancies` to view vacancies
+  - `POST /api/vacancies` to post vacancy and receive a management token
+  - `GET /api/vacancies` to view vacancies (supports optional `city` filter)
+  - `PUT /api/vacancies/{id}?token=...` to modify a vacancy with its management token
+  - `DELETE /api/vacancies/{id}?token=...` to delete a vacancy with its management token
   - optional nearby filtering via query params: `latitude`, `longitude`, `radiusKm` (only for location-aware search)
 - **search-service (Spring Boot, port 8082)**
   - `GET /api/search/nearby` (delegates to vacancy-service nearby search)
@@ -23,10 +25,12 @@ Microserviced web application for posting and finding nearby room/home vacancies
 - `description`
 - `roomType`
 - `rent`
+- `city`
 - `address`
 - `latitude` (optional)
 - `longitude` (optional)
 - `createdBy`
+- `managementToken` (used for future modify/delete)
 - `createdAt`
 
 Indexes are configured on `(latitude, longitude)` and `createdAt`.
