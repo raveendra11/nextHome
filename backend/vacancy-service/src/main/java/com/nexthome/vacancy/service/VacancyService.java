@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -100,7 +101,7 @@ public class VacancyService {
     private Vacancy getManagedVacancy(Long id, String token) {
         Vacancy vacancy = vacancyRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Vacancy not found"));
-        if (!vacancy.getManagementToken().equals(token)) {
+        if (!Objects.equals(vacancy.getManagementToken(), token)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid management token");
         }
         return vacancy;

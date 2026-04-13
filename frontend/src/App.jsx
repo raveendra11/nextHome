@@ -46,6 +46,7 @@ function PostVacancy({ onBack }) {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [managementToken, setManagementToken] = useState('')
+  const [tokenCopied, setTokenCopied] = useState(false)
   const [error, setError] = useState('')
 
   const numericValues = useMemo(
@@ -89,6 +90,7 @@ function PostVacancy({ onBack }) {
     setIsLoading(true)
     setMessage('')
     setManagementToken('')
+    setTokenCopied(false)
     setError('')
 
     try {
@@ -109,11 +111,22 @@ function PostVacancy({ onBack }) {
 
       setMessage('Vacancy posted successfully.')
       setManagementToken(payload.managementToken || '')
+      setTokenCopied(false)
       setForm(initialForm)
     } catch (submitError) {
       setError(submitError.message)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const copyManagementToken = async () => {
+    if (!managementToken) return
+    try {
+      await navigator.clipboard.writeText(managementToken)
+      setTokenCopied(true)
+    } catch {
+      setError('Unable to copy token. Please copy it manually.')
     }
   }
 
@@ -132,7 +145,14 @@ function PostVacancy({ onBack }) {
         <button type="submit" disabled={!canSubmit || isLoading}>{isLoading ? 'Posting...' : 'Submit Vacancy'}</button>
       </form>
       {message && <p className="ok-message">{message}</p>}
-      {managementToken && <p className="ok-message">Management Token: <strong>{managementToken}</strong></p>}
+      {managementToken && (
+        <>
+          <p className="ok-message">Management Token: <strong>{managementToken}</strong></p>
+          <p className="ok-message">Save this token safely. It is required to update or delete this vacancy later.</p>
+          <button type="button" onClick={copyManagementToken}>Copy Token</button>
+          {tokenCopied && <p className="ok-message">Token copied.</p>}
+        </>
+      )}
       {error && <p className="error-message">{error}</p>}
     </section>
   )

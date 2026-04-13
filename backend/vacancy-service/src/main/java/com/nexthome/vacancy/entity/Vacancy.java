@@ -45,7 +45,7 @@ public class Vacancy {
     @Column(nullable = false, length = 100)
     private String createdBy;
 
-    @Column(nullable = false, length = 64, unique = true)
+    @Column(nullable = false, length = 32, unique = true)
     private String managementToken;
 
     @Column(nullable = false, updatable = false)
