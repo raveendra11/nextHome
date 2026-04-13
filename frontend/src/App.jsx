@@ -171,7 +171,6 @@ function ViewVacancies({ onBack }) {
             <p><strong>Rent:</strong> ₹{vacancy.rent}</p>
             <p><strong>Address:</strong> {vacancy.address}</p>
             <p><strong>Posted By:</strong> {vacancy.createdBy}</p>
-            {typeof vacancy.distanceKm === 'number' && <p><strong>Distance:</strong> {vacancy.distanceKm.toFixed(2)} km</p>}
           </article>
         ))}
       </div>

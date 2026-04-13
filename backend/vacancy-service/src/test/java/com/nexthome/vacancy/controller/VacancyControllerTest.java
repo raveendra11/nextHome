@@ -45,7 +45,7 @@ class VacancyControllerTest {
 
         mockMvc.perform(post("/api/vacancies")
                         .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.title").value("Shared room near metro"))
