@@ -33,12 +33,12 @@ public class VacancyController {
     @GetMapping
     public List<VacancyResponse> list(
             @RequestParam(name = "latitude", required = false)
-            @DecimalMin(value = "-90.0", message = "latitude must be >= -90")
-            @DecimalMax(value = "90.0", message = "latitude must be <= 90")
+            @DecimalMin(value = "-90.0", message = "Latitude must be >= -90")
+            @DecimalMax(value = "90.0", message = "Latitude must be <= 90")
             Double latitude,
             @RequestParam(name = "longitude", required = false)
-            @DecimalMin(value = "-180.0", message = "longitude must be >= -180")
-            @DecimalMax(value = "180.0", message = "longitude must be <= 180")
+            @DecimalMin(value = "-180.0", message = "Longitude must be >= -180")
+            @DecimalMax(value = "180.0", message = "Longitude must be <= 180")
             Double longitude,
             @RequestParam(name = "radiusKm", required = false)
             @Positive(message = "radiusKm must be positive")

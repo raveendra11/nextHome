@@ -52,7 +52,7 @@ class VacancyControllerTest {
 
     @Test
     void listsVacancies() throws Exception {
-        createVacancy();
+        setupVacancy();
 
         mockMvc.perform(get("/api/vacancies"))
                 .andExpect(status().isOk())
@@ -65,7 +65,7 @@ class VacancyControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    private void createVacancy() throws Exception {
+    private void setupVacancy() throws Exception {
         mockMvc.perform(post("/api/vacancies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildValidRequest())))

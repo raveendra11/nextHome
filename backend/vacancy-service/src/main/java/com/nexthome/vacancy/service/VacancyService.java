@@ -13,7 +13,7 @@ import java.util.List;
 public class VacancyService {
 
     private static final double KM_PER_DEGREE = 111.0;
-    private static final double MIN_COSINE_VALUE = 0.01;
+    private static final double MIN_SAFE_COSINE = 1e-6;
 
     private final VacancyRepository vacancyRepository;
 
@@ -41,8 +41,10 @@ public class VacancyService {
         boolean canFilterNearby = latitude != null && longitude != null && radiusKm != null;
         if (canFilterNearby) {
             double latitudeDelta = radiusKm / KM_PER_DEGREE;
-            double safeCos = Math.max(Math.cos(Math.toRadians(latitude)), MIN_COSINE_VALUE);
-            double longitudeDelta = radiusKm / (KM_PER_DEGREE * safeCos);
+            double cosine = Math.cos(Math.toRadians(latitude));
+            double longitudeDelta = Math.abs(cosine) < MIN_SAFE_COSINE
+                    ? 180.0
+                    : radiusKm / (KM_PER_DEGREE * Math.abs(cosine));
             all = vacancyRepository.findByLatitudeBetweenAndLongitudeBetweenOrderByCreatedAtDesc(
                     latitude - latitudeDelta,
                     latitude + latitudeDelta,
