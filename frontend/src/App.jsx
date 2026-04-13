@@ -181,6 +181,7 @@ function ViewVacancies({ onBack }) {
   const [managementToken, setManagementToken] = useState('')
   const [editForm, setEditForm] = useState(initialForm)
   const [actionLoading, setActionLoading] = useState(false)
+  const [isDeleteConfirming, setIsDeleteConfirming] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
@@ -239,21 +240,12 @@ function ViewVacancies({ onBack }) {
   const canDelete = activeVacancyId != null && managementToken.trim().length > 0
 
   const startManage = (vacancy) => {
-    const enteredToken = window.prompt('Enter management token to modify/delete this vacancy.')
-    if (enteredToken == null) {
-      return
-    }
-    const trimmedToken = enteredToken.trim()
-    if (!trimmedToken) {
-      setError('Management token is required.')
-      setMessage('')
-      return
-    }
     setActiveVacancyId(vacancy.id)
-    setManagementToken(trimmedToken)
+    setManagementToken('')
     setEditForm(toVacancyForm(vacancy))
+    setIsDeleteConfirming(false)
     setError('')
-    setMessage('Token captured. You can now update or delete this vacancy.')
+    setMessage('Enter management token to update or delete this vacancy.')
   }
 
   const updateEditField = (field, value) => {
@@ -293,6 +285,7 @@ function ViewVacancies({ onBack }) {
       setVacancies((prev) =>
         prev.map((vacancy) => (vacancy.id === activeVacancyId ? updatedVacancy : vacancy)),
       )
+      setIsDeleteConfirming(false)
       setMessage('Vacancy updated successfully.')
     } catch (updateError) {
       setError(updateError.message)
@@ -307,7 +300,11 @@ function ViewVacancies({ onBack }) {
       setMessage('')
       return
     }
-    if (!window.confirm('Are you sure you want to delete this vacancy?')) {
+
+    if (!isDeleteConfirming) {
+      setIsDeleteConfirming(true)
+      setError('')
+      setMessage('Press Delete Vacancy again to confirm deletion.')
       return
     }
 
@@ -329,6 +326,7 @@ function ViewVacancies({ onBack }) {
       setActiveVacancyId(null)
       setManagementToken('')
       setEditForm(initialForm)
+      setIsDeleteConfirming(false)
       setMessage('Vacancy deleted successfully.')
     } catch (deleteError) {
       setError(deleteError.message)
@@ -374,6 +372,14 @@ function ViewVacancies({ onBack }) {
 
             {activeVacancyId === vacancy.id && (
               <form className="card form-grid inline-manage-form" onSubmit={submitUpdate}>
+                <input
+                  placeholder="Management Token"
+                  value={managementToken}
+                  onChange={(event) => {
+                    setManagementToken(event.target.value)
+                    setIsDeleteConfirming(false)
+                  }}
+                />
                 <input
                   placeholder="Title"
                   value={editForm.title}
@@ -421,7 +427,7 @@ function ViewVacancies({ onBack }) {
                     onClick={deleteVacancy}
                     disabled={!canDelete || actionLoading}
                   >
-                    {actionLoading ? 'Working...' : 'Delete Vacancy'}
+                    {actionLoading ? 'Working...' : isDeleteConfirming ? 'Confirm Delete Vacancy' : 'Delete Vacancy'}
                   </button>
                 </div>
               </form>
