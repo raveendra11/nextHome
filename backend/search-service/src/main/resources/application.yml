@@ -8,6 +8,8 @@ server:
 services:
   vacancy:
     url: ${VACANCY_SERVICE_URL:http://localhost:8081}
+    connect-timeout-ms: ${VACANCY_SERVICE_CONNECT_TIMEOUT_MS:2000}
+    read-timeout-ms: ${VACANCY_SERVICE_READ_TIMEOUT_MS:5000}
 
 management:
   endpoints:

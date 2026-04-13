@@ -4,9 +4,9 @@ import com.nexthome.vacancy.dto.VacancyRequest;
 import com.nexthome.vacancy.dto.VacancyResponse;
 import com.nexthome.vacancy.entity.Vacancy;
 import com.nexthome.vacancy.repository.VacancyRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -34,8 +34,21 @@ public class VacancyService {
     }
 
     public List<VacancyResponse> list(Double latitude, Double longitude, Double radiusKm) {
-        List<Vacancy> all = vacancyRepository.findAll();
+        List<Vacancy> all;
         boolean canFilterNearby = latitude != null && longitude != null && radiusKm != null;
+        if (canFilterNearby) {
+            double latitudeDelta = radiusKm / 111.0;
+            double safeCos = Math.max(Math.cos(Math.toRadians(latitude)), 0.01);
+            double longitudeDelta = radiusKm / (111.0 * safeCos);
+            all = vacancyRepository.findByLatitudeBetweenAndLongitudeBetweenOrderByCreatedAtDesc(
+                    latitude - latitudeDelta,
+                    latitude + latitudeDelta,
+                    longitude - longitudeDelta,
+                    longitude + longitudeDelta
+            );
+        } else {
+            all = vacancyRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
 
         return all.stream()
                 .map(v -> {
@@ -46,7 +59,6 @@ public class VacancyService {
                     return toResponse(v, distance);
                 })
                 .filter(v -> !canFilterNearby || (v.distanceKm() != null && v.distanceKm() <= radiusKm))
-                .sorted(Comparator.comparing(VacancyResponse::createdAt).reversed())
                 .toList();
     }
 

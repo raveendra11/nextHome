@@ -50,7 +50,7 @@ Services:
 ### Backend
 
 ```bash
-cd /home/runner/work/nextHome/nextHome/backend
+cd backend
 mvn clean test
 mvn -pl vacancy-service spring-boot:run
 mvn -pl search-service spring-boot:run
@@ -65,7 +65,7 @@ Configure MySQL env vars for vacancy-service:
 ### Frontend
 
 ```bash
-cd /home/runner/work/nextHome/nextHome/frontend
+cd frontend
 npm install
 npm run dev
 ```

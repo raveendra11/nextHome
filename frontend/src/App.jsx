@@ -48,9 +48,34 @@ function PostVacancy({ onBack }) {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
+  const numericValues = useMemo(
+    () => ({
+      rent: Number(form.rent),
+      latitude: Number(form.latitude),
+      longitude: Number(form.longitude),
+    }),
+    [form.rent, form.latitude, form.longitude],
+  )
+
+  const numericValidationError = useMemo(() => {
+    if (!Number.isFinite(numericValues.rent) || numericValues.rent <= 0) {
+      return 'Rent must be a valid positive number.'
+    }
+
+    if (!Number.isFinite(numericValues.latitude) || numericValues.latitude < -90 || numericValues.latitude > 90) {
+      return 'Latitude must be a valid number between -90 and 90.'
+    }
+
+    if (!Number.isFinite(numericValues.longitude) || numericValues.longitude < -180 || numericValues.longitude > 180) {
+      return 'Longitude must be a valid number between -180 and 180.'
+    }
+
+    return ''
+  }, [numericValues])
+
   const canSubmit = useMemo(
-    () => Object.values(form).every((value) => String(value).trim().length > 0),
-    [form],
+    () => Object.values(form).every((value) => String(value).trim().length > 0) && !numericValidationError,
+    [form, numericValidationError],
   )
 
   const updateField = (field, value) => {
@@ -59,7 +84,12 @@ function PostVacancy({ onBack }) {
 
   const submit = async (event) => {
     event.preventDefault()
-    if (!canSubmit) return
+    if (!canSubmit) {
+      if (numericValidationError) {
+        setError(numericValidationError)
+      }
+      return
+    }
 
     setIsLoading(true)
     setMessage('')
@@ -71,9 +101,9 @@ function PostVacancy({ onBack }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          rent: Number(form.rent),
-          latitude: Number(form.latitude),
-          longitude: Number(form.longitude),
+          rent: numericValues.rent,
+          latitude: numericValues.latitude,
+          longitude: numericValues.longitude,
         }),
       })
 

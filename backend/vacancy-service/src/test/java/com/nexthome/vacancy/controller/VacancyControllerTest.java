@@ -3,6 +3,7 @@ package com.nexthome.vacancy.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexthome.vacancy.dto.VacancyRequest;
 import com.nexthome.vacancy.repository.VacancyRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,18 +33,14 @@ class VacancyControllerTest {
     @Autowired
     private VacancyRepository vacancyRepository;
 
+    @AfterEach
+    void cleanup() {
+        vacancyRepository.deleteAll();
+    }
+
     @Test
     void createsVacancy() throws Exception {
-        VacancyRequest request = new VacancyRequest(
-                "Shared room near metro",
-                "One bed available in 2BHK apartment",
-                "SHARED",
-                new BigDecimal("7000"),
-                "MG Road, Bengaluru",
-                12.975,
-                77.604,
-                "ravi"
-        );
+        VacancyRequest request = buildValidRequest();
 
         mockMvc.perform(post("/api/vacancies")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -55,12 +52,36 @@ class VacancyControllerTest {
 
     @Test
     void listsVacancies() throws Exception {
-        createsVacancy();
+        createVacancy();
 
         mockMvc.perform(get("/api/vacancies"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").isNumber());
+    }
 
-        vacancyRepository.deleteAll();
+    @Test
+    void rejectsNegativeRadius() throws Exception {
+        mockMvc.perform(get("/api/vacancies").param("radiusKm", "-1"))
+                .andExpect(status().isBadRequest());
+    }
+
+    private void createVacancy() throws Exception {
+        mockMvc.perform(post("/api/vacancies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(buildValidRequest())))
+                .andExpect(status().isCreated());
+    }
+
+    private VacancyRequest buildValidRequest() {
+        return new VacancyRequest(
+                "Shared room near metro",
+                "One bed available in 2BHK apartment",
+                "SHARED",
+                new BigDecimal("7000"),
+                "MG Road, Bengaluru",
+                12.975,
+                77.604,
+                "ravi"
+        );
     }
 }
