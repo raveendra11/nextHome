@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -47,7 +48,9 @@ class VacancyControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.title").value("Shared room near metro"));
+                .andExpect(jsonPath("$.title").value("Shared room near metro"))
+                .andExpect(jsonPath("$.latitude").value(nullValue()))
+                .andExpect(jsonPath("$.longitude").value(nullValue()));
     }
 
     @Test
@@ -79,8 +82,8 @@ class VacancyControllerTest {
                 "SHARED",
                 new BigDecimal("7000"),
                 "MG Road, Bengaluru",
-                12.975,
-                77.604,
+                null,
+                null,
                 "ravi"
         );
     }

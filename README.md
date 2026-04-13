@@ -7,7 +7,7 @@ Microserviced web application for posting and finding nearby room/home vacancies
 - **vacancy-service (Spring Boot, port 8081)**
   - `POST /api/vacancies` to post vacancy
   - `GET /api/vacancies` to view vacancies
-  - optional nearby filtering via query params: `latitude`, `longitude`, `radiusKm`
+  - optional nearby filtering via query params: `latitude`, `longitude`, `radiusKm` (only for location-aware search)
 - **search-service (Spring Boot, port 8082)**
   - `GET /api/search/nearby` (delegates to vacancy-service nearby search)
 - **gateway-service (Spring Cloud Gateway, port 8080)**
@@ -24,8 +24,8 @@ Microserviced web application for posting and finding nearby room/home vacancies
 - `roomType`
 - `rent`
 - `address`
-- `latitude`
-- `longitude`
+- `latitude` (optional)
+- `longitude` (optional)
 - `createdBy`
 - `createdAt`
 
