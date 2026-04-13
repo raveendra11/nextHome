@@ -23,6 +23,7 @@ function App() {
       {activeView === 'home' && <Home onSelect={setActiveView} />}
       {activeView === 'post' && <PostVacancy onBack={() => setActiveView('home')} />}
       {activeView === 'view' && <ViewVacancies onBack={() => setActiveView('home')} />}
+      {activeView === 'manage' && <ManageVacancy onBack={() => setActiveView('home')} />}
     </main>
   )
 }
@@ -38,6 +39,9 @@ function Home({ onSelect }) {
         <button type="button" className="home-action" onClick={() => onSelect('view')}>
           View Vacancy
         </button>
+        <button type="button" className="home-action" onClick={() => onSelect('manage')}>
+          Modify / Delete Post
+        </button>
       </div>
     </section>
   )
@@ -47,6 +51,7 @@ function PostVacancy({ onBack }) {
   const [form, setForm] = useState(initialForm)
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [vacancyId, setVacancyId] = useState('')
   const [managementToken, setManagementToken] = useState('')
   const [tokenCopied, setTokenCopied] = useState(false)
   const [error, setError] = useState('')
@@ -112,6 +117,7 @@ function PostVacancy({ onBack }) {
       }
 
       setMessage('Vacancy posted successfully.')
+      setVacancyId(payload?.vacancy?.id ? String(payload.vacancy.id) : '')
       setManagementToken(payload.managementToken || '')
       setTokenCopied(false)
       setForm(initialForm)
@@ -149,12 +155,199 @@ function PostVacancy({ onBack }) {
       {message && <p className="ok-message">{message}</p>}
       {managementToken && (
         <>
+          <p className="ok-message">Vacancy ID: <strong>{vacancyId}</strong></p>
           <p className="ok-message">Management Token: <strong>{managementToken}</strong></p>
           <p className="ok-message">Save this token safely. It is required to update or delete this vacancy later.</p>
           <button type="button" onClick={copyManagementToken}>Copy Token</button>
           {tokenCopied && <p className="ok-message">Token copied.</p>}
         </>
       )}
+      {error && <p className="error-message">{error}</p>}
+    </section>
+  )
+}
+
+function ManageVacancy({ onBack }) {
+  const [vacancyId, setVacancyId] = useState('')
+  const [token, setToken] = useState('')
+  const [form, setForm] = useState(initialForm)
+  const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+
+  const parsedId = Number(vacancyId)
+  const hasValidId = Number.isInteger(parsedId) && parsedId > 0
+
+  const numericValues = useMemo(
+    () => ({
+      rent: Number(form.rent),
+    }),
+    [form.rent],
+  )
+
+  const numericValidationError = useMemo(() => {
+    if (!Number.isFinite(numericValues.rent) || numericValues.rent <= 0) {
+      return 'Rent must be a valid positive number.'
+    }
+
+    return ''
+  }, [numericValues])
+
+  const canUpdate = useMemo(() => {
+    const requiredFieldsFilled =
+      form.title.trim().length > 0 &&
+      form.description.trim().length > 0 &&
+      form.roomType.trim().length > 0 &&
+      form.city.trim().length > 0 &&
+      form.createdBy.trim().length > 0
+    return requiredFieldsFilled && !numericValidationError && hasValidId && token.trim().length > 0
+  }, [form, hasValidId, numericValidationError, token])
+
+  const canDelete = hasValidId && token.trim().length > 0
+
+  const updateField = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const loadVacancy = async () => {
+    if (!hasValidId) {
+      setError('Please enter a valid vacancy ID.')
+      return
+    }
+
+    setIsLoading(true)
+    setMessage('')
+    setError('')
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/vacancies`)
+      if (!response.ok) {
+        throw new Error('Unable to load vacancies.')
+      }
+      const data = await response.json()
+      const vacancy = Array.isArray(data) ? data.find((item) => Number(item.id) === parsedId) : null
+      if (!vacancy) {
+        throw new Error('Vacancy not found for the provided ID.')
+      }
+      setForm({
+        title: vacancy.title || '',
+        description: vacancy.description || '',
+        roomType: vacancy.roomType || '',
+        rent: vacancy.rent != null ? String(vacancy.rent) : '',
+        city: vacancy.city || '',
+        address: vacancy.address || '',
+        createdBy: vacancy.createdBy || '',
+      })
+      setMessage('Vacancy loaded. You can now edit and update it.')
+    } catch (loadError) {
+      setError(loadError.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const submitUpdate = async (event) => {
+    event.preventDefault()
+    if (!canUpdate) {
+      setError(numericValidationError || 'Please fill all required fields, vacancy ID, and token.')
+      return
+    }
+
+    setIsLoading(true)
+    setMessage('')
+    setError('')
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/vacancies/${parsedId}?token=${encodeURIComponent(token.trim())}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          rent: numericValues.rent,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Unable to update vacancy. Check ID and management token.')
+      }
+
+      setMessage('Vacancy updated successfully.')
+    } catch (updateError) {
+      setError(updateError.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const deleteVacancy = async () => {
+    if (!canDelete) {
+      setError('Vacancy ID and management token are required for delete.')
+      return
+    }
+
+    setIsLoading(true)
+    setMessage('')
+    setError('')
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/vacancies/${parsedId}?token=${encodeURIComponent(token.trim())}`, {
+        method: 'DELETE',
+      })
+      if (!response.ok) {
+        throw new Error('Unable to delete vacancy. Check ID and management token.')
+      }
+      setMessage('Vacancy deleted successfully.')
+      setForm(initialForm)
+      setVacancyId('')
+      setToken('')
+    } catch (deleteError) {
+      setError(deleteError.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <section className="screen">
+      <button className="back-button" onClick={onBack} type="button">Back</button>
+      <h2>Modify / Delete Vacancy</h2>
+      <div className="card form-grid">
+        <input
+          placeholder="Vacancy ID"
+          type="number"
+          min="1"
+          value={vacancyId}
+          onChange={(event) => setVacancyId(event.target.value)}
+        />
+        <input
+          placeholder="Management Token"
+          value={token}
+          onChange={(event) => setToken(event.target.value)}
+        />
+        <button type="button" onClick={loadVacancy} disabled={isLoading}>
+          {isLoading ? 'Loading...' : 'Load Vacancy by ID'}
+        </button>
+      </div>
+
+      <form className="card form-grid" onSubmit={submitUpdate}>
+        <input placeholder="Title" value={form.title} onChange={(e) => updateField('title', e.target.value)} />
+        <textarea placeholder="Description" value={form.description} onChange={(e) => updateField('description', e.target.value)} />
+        <input placeholder="Room Type (e.g. PRIVATE)" value={form.roomType} onChange={(e) => updateField('roomType', e.target.value)} />
+        <input placeholder="Rent" type="number" min="1" value={form.rent} onChange={(e) => updateField('rent', e.target.value)} />
+        <input placeholder="City" value={form.city} onChange={(e) => updateField('city', e.target.value)} />
+        <input placeholder="Address (optional)" value={form.address} onChange={(e) => updateField('address', e.target.value)} />
+        <input placeholder="Your Name" value={form.createdBy} onChange={(e) => updateField('createdBy', e.target.value)} />
+        <div className="row-actions">
+          <button type="submit" disabled={!canUpdate || isLoading}>
+            {isLoading ? 'Saving...' : 'Update Vacancy'}
+          </button>
+          <button type="button" className="danger-button" onClick={deleteVacancy} disabled={!canDelete || isLoading}>
+            {isLoading ? 'Working...' : 'Delete Vacancy'}
+          </button>
+        </div>
+      </form>
+
+      {message && <p className="ok-message">{message}</p>}
       {error && <p className="error-message">{error}</p>}
     </section>
   )

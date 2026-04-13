@@ -105,10 +105,10 @@ Optional API base URL:
 ## Phase coverage
 
 Implemented now:
-- Vacancy service CRUD subset (post + list)
+- Vacancy service token-based post/list/update/delete
 - Nearby filtering support
 - Search microservice and gateway
-- React UI for post/view flows
+- React UI for post/view/modify/delete flows
 - Basic validation, CORS, health endpoints
 - Backend tests for vacancy API
 
