@@ -120,6 +120,23 @@ button:disabled {
   margin-top: 0;
 }
 
+.vacancy-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.manage-card-button {
+  width: auto;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.inline-manage-form {
+  margin-top: 12px;
+}
+
 .ok-message {
   color: #0b8c53;
 }
